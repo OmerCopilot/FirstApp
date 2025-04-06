@@ -18,11 +18,9 @@ const SecondScreen = () => {
     return (
         <View style={styles.container}>
             <MainMap>
-            {/* Use MainCharacter to render the character */}
                 <MainCharacter position={characterPosition} />
+                <Joystick onMove={handleJoystickMove} />
             </MainMap>
-            <Joystick onMove={handleJoystickMove} />
-            <Text>Use the joystick to move the character continuously!</Text>
         </View>
         );
     };
@@ -32,14 +30,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  character: {
-    position: 'absolute',
-    width: 50,
-    height: 50,
-    backgroundColor: 'red',
-    borderRadius: 25,
-  },
+  }
 });
 
 export default SecondScreen;

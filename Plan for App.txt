@@ -1,0 +1,5 @@
+1) Learn how to use react
+
+2) Implement Jira and Create Tasks
+
+3) Setup Teamcity Pipeline 

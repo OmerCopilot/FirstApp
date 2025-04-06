@@ -16,7 +16,7 @@ const styles = StyleSheet.create({
   character: {
     width: 50,
     height: 50,
-    backgroundColor: 'red', // Character color
+    backgroundColor: 'blue', // Character color
     position: 'absolute',
     borderRadius: 25,
   },
