@@ -32,12 +32,12 @@ const Joystick = ({ onMove }) => {
         const dy = pan.y.__getValue();
 
         // If the joystick is moved significantly, call onMove to move the character
-        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+        if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
           // Normalize the joystick's position to limit its movement
           const magnitude = Math.sqrt(dx * dx + dy * dy);
-          if (magnitude > 100) {
+          if (magnitude > 25) {
             const angle = Math.atan2(dy, dx);
-            const speed = 5; // Adjust this for desired speed
+            const speed = 2; // Adjust this for desired speed
             const velocityX = speed * Math.cos(angle);
             const velocityY = speed * Math.sin(angle);
 
@@ -45,7 +45,7 @@ const Joystick = ({ onMove }) => {
             onMove(velocityX, velocityY);
           }
         }
-      }, 16); // Roughly 60fps (16ms per frame)
+      }, 5); // Roughly 60fps (16ms per frame)
 
       return () => clearInterval(interval);
     }
@@ -72,19 +72,22 @@ const Joystick = ({ onMove }) => {
 
 const styles = StyleSheet.create({
   joystickContainer: {
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    borderWidth: 2,
+    position: 'absolute', // Position the joystick absolutely
+    bottom: 40, // Distance from the bottom of the screen
+    left: 60, // Distance from the left of the screen
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    borderWidth: 1,
     borderColor: '#ccc',
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.2)',
   },
   joystick: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
 });
