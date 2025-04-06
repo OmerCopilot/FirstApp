@@ -10,5 +10,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#228B22', // Green map
     position: 'relative',
+    width: '100%', // Ensure it spans the full width
+    height: '100%', // Ensure it spans the full height
   },
 });
