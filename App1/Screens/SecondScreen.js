@@ -1,63 +1,45 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Dimensions } from '../CommonImports';
+import React, { useState } from 'react';
+import { View, StyleSheet, Text } from 'react-native';
 import Joystick from '../Components/Joystick';
-
-const { width, height } = Dimensions.get('window');
-
-export default function SecondScreen() {
-  const [characterPosition, setCharacterPosition] = useState({ x: width / 2, y: height / 2 });
-  const [isMoving, setIsMoving] = useState(false);
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import MainMap from '../Maps/MainMap';
+import MainCharacter from '../Characters/MainCharacter';
+const SecondScreen = () => {
+  const [characterPosition, setCharacterPosition] = useState({ x: 150, y: 150 });
 
   const handleJoystickMove = (dx, dy) => {
-    setIsMoving(true);
-    setCharacterPosition((prev) => {
-      const moveX = dx / 10; // Adjust sensitivity
-      const moveY = dy / 10;
-      return {
-        x: Math.min(Math.max(0, prev.x + moveX), width - 50),
-        y: Math.min(Math.max(0, prev.y + moveY), height - 50),
-      };
-    });
-  };
+    // Move the character continuously based on joystick direction
+    setCharacterPosition((prevPosition) => ({
+        x: prevPosition.x + dx,
+        y: prevPosition.y + dy,
+      }));
+    };
 
-  const handleJoystickRelease = () => {
-    setIsMoving(false);
-  };
-
-  return (
-    <View style={styles.container}>
-      {/* Map */}
-      <View style={styles.map}>
-        {/* Character */}
-        <View
-          style={[
-            styles.character,
-            { top: characterPosition.y, left: characterPosition.x },
-          ]}
-        />
-      </View>
-
-      {/* Joystick */}
-      <Joystick onMove={handleJoystickMove} onRelease={handleJoystickRelease} />
-    </View>
-  );
-}
+    return (
+        <View style={styles.container}>
+            <MainMap>
+            {/* Use MainCharacter to render the character */}
+                <MainCharacter position={characterPosition} />
+            </MainMap>
+            <Joystick onMove={handleJoystickMove} />
+            <Text>Use the joystick to move the character continuously!</Text>
+        </View>
+        );
+    };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#87CEEB', // Sky blue background
-  },
-  map: {
-    flex: 1,
-    backgroundColor: '#228B22', // Green map
-    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   character: {
+    position: 'absolute',
     width: 50,
     height: 50,
-    backgroundColor: 'red', // Character color
-    position: 'absolute',
+    backgroundColor: 'red',
     borderRadius: 25,
   },
 });
+
+export default SecondScreen;

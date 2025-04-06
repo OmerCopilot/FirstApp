@@ -1,74 +1,92 @@
-import React, { useEffect } from 'react';
-import { StyleSheet, View, PanResponder, Animated } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, StyleSheet, Animated } from 'react-native';
+import { PanGestureHandler } from 'react-native-gesture-handler';
 
-export default function Joystick({ onMove, onRelease }) {
-  const joystickPosition = new Animated.ValueXY({ x: 0, y: 0 });
+const Joystick = ({ onMove }) => {
+  const pan = useRef(new Animated.ValueXY()).current;
+  const [dragging, setDragging] = useState(false);
 
-  const panResponder = PanResponder.create({
-    onMoveShouldSetPanResponder: () => true,
-    onPanResponderMove: (e, gestureState) => {
-      // Update joystick position
-      Animated.event(
-        [
-          null,
-          { dx: joystickPosition.x, dy: joystickPosition.y },
-        ],
-        { useNativeDriver: false }
-      )(e, gestureState);
+  // Handle pan gesture update
+  const onGestureEvent = Animated.event(
+    [{ nativeEvent: { translationX: pan.x, translationY: pan.y } }],
+    { useNativeDriver: false }
+  );
 
-      // Notify parent about movement
-      if (onMove) {
-        onMove(gestureState.dx, gestureState.dy);
-      }
-    },
-    onPanResponderRelease: () => {
-      // Reset joystick position
-      Animated.spring(joystickPosition, {
-        toValue: { x: 0, y: 0 },
-        useNativeDriver: false,
-      }).start();
+  const onHandlerStateChange = (event) => {
+    if (event.nativeEvent.state === 5) { // When gesture is released
+      // Reset joystick position when gesture ends
+      setDragging(false);
+      pan.setValue({ x: 0, y: 0 });
+      onMove(0, 0); // Stop character movement when released
+    } else {
+      setDragging(true);
+    }
+  };
 
-      // Notify parent about release
-      if (onRelease) {
-        onRelease();
-      }
-    },
-  });
+  // Effect to move joystick and trigger continuous movement
+  useEffect(() => {
+    if (dragging) {
+      const interval = setInterval(() => {
+        // Get the values of pan.x and pan.y
+        const dx = pan.x.__getValue();
+        const dy = pan.y.__getValue();
+
+        // If the joystick is moved significantly, call onMove to move the character
+        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+          // Normalize the joystick's position to limit its movement
+          const magnitude = Math.sqrt(dx * dx + dy * dy);
+          if (magnitude > 100) {
+            const angle = Math.atan2(dy, dx);
+            const speed = 5; // Adjust this for desired speed
+            const velocityX = speed * Math.cos(angle);
+            const velocityY = speed * Math.sin(angle);
+
+            // Update position
+            onMove(velocityX, velocityY);
+          }
+        }
+      }, 16); // Roughly 60fps (16ms per frame)
+
+      return () => clearInterval(interval);
+    }
+  }, [dragging, pan, onMove]);
 
   return (
     <View style={styles.joystickContainer}>
-      <Animated.View
-        {...panResponder.panHandlers}
-        style={[
-          styles.joystick,
-          {
-            transform: [
-              { translateX: joystickPosition.x },
-              { translateY: joystickPosition.y },
-            ],
-          },
-        ]}
-      />
+      <PanGestureHandler
+        onGestureEvent={onGestureEvent}
+        onHandlerStateChange={onHandlerStateChange}
+      >
+        <Animated.View
+          style={[
+            styles.joystick,
+            {
+              transform: [{ translateX: pan.x }, { translateY: pan.y }],
+            },
+          ]}
+        />
+      </PanGestureHandler>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   joystickContainer: {
-    position: 'absolute',
-    bottom: 50, // Distance from the bottom
-    right: 50, // Distance from the right
-    width: 100,
-    height: 100,
-    backgroundColor: '#ccc',
-    borderRadius: 50,
-    alignItems: 'center',
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    borderWidth: 2,
+    borderColor: '#ccc',
     justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.2)',
   },
   joystick: {
-    width: 50,
-    height: 50,
-    backgroundColor: '#888',
-    borderRadius: 25,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
 });
+
+export default Joystick;
